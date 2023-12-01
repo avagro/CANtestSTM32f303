@@ -1,0 +1,61 @@
+{
+	"build_systems":
+	[
+		{
+			"cmd": ["make"],
+			"name": "ARM build",
+			"working_dir": "${project_path}",
+			"file_regex": "^(.*):(\\d+):(\\d+):\\s*(.*)$",
+		},
+		// {
+		// 	"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+		// 	"name": "Anaconda Python Builder",
+		// 	"selector": "source.python",
+		// 	"shell_cmd": "\"cmd\" -u \"$file\""
+		// },
+		//
+		{
+			"cmd": ["make", "install"],
+			"name": "ARM prog",
+			"working_dir": "${project_path}",
+			"file_regex": "^(.*):(\\d+):(\\d+):\\s*(.*)$",
+
+
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"python\" -u \"$file\""
+		},
+	],
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": ".",
+		}
+	],
+
+	"settings":	{
+		// Настройки линтеров
+		"SublimeLinter.linters.clang.extra_flags": "-DSTM32F303xC",
+        "SublimeLinter.linters.clang.include_dirs": [
+            // "${project}/Core",
+            "${project}/Core/Inc",
+            "${project}/Core/Src",
+            // "${project}/user-code/FatFs"
+		],
+        //Настройка GDB
+		"sublimegdb_workingdir": "${project_path:build}",
+		"sublimegdb_commandline": "arm-none-eabi-gdb --interpreter=mi *.elf",
+	},
+
+	"commands":
+	[
+		{
+			"keys": ["ctrl+f5"], "command": "ARM prog",
+		}
+
+	],
+}
