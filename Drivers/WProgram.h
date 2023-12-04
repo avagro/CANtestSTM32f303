@@ -1,5 +1,5 @@
-
-
+#include <stdbool.h>
+#include <stdint.h>
 typedef unsigned int word;
 
 #define bit(b) (1UL << (b))

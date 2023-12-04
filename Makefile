@@ -153,7 +153,7 @@ ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffuncti
 
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 # /* USER CODE BEGIN flags */
-CPPFLAGS += $(CPP_INCLUDES) $(CPP_SOURCES) -x c++
+CPPFLAGS = $(MCU) $(C_DEFS) $(CPP_INCLUDES) $(CPP_SOURCES) $(OPT) -Wall -fdata-sections -ffunction-sections -x c++
 # /* USER CODE END flags */
 
 ifeq ($(DEBUG), 1)
@@ -161,9 +161,7 @@ CFLAGS += -g -gdwarf-2
 endif
 
 # /* USER CODE BEGIN cpp */
-ifdef CPP_INCLUDES
-CFLAGS += $(CPPFLAGS)
-endif
+
 # /* USER CODE END cpp */
 
 # Generate dependency information
@@ -201,19 +199,26 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
+
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(CPP_SOURCES:.cpp=.o)))
+vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
+
 # list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 
 # /* USER CODE BEGIN cpp */
-ifdef CPP_INCLUDES
-$(BUILD_DIR)/%.o: %.c %.cpp Makefile | $(BUILD_DIR)
-	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
-else
+# ifdef CPP_INCLUDES
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
-	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
-endif
+	$(CC) -c $(CFLAGS) $(CPP_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+
+$(BUILD_DIR)/%.o: %.cpp Makefile | $(BUILD_DIR)
+	$(CPP) -c $(CPPFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
+# else
+# $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
+# 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+# endif
 # /* USER CODE END cpp */
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
