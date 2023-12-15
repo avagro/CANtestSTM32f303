@@ -15,19 +15,26 @@
 		// },
 		//
 		{
-			"cmd": ["make", "install"],
-			"name": "ARM prog",
+			"cmd": ["make", "run"],
+			"name": "make run",
 			"working_dir": "${project_path}",
 			"file_regex": "^(.*):(\\d+):(\\d+):\\s*(.*)$",
-
-
 		},
+
 		{
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "Anaconda Python Builder",
-			"selector": "source.python",
-			"shell_cmd": "\"python\" -u \"$file\""
+			"cmd": ["make", "install"],
+			"name": "make install",
+			"working_dir": "${project_path}",
+			"file_regex": "^(.*):(\\d+):(\\d+):\\s*(.*)$",
 		},
+
+		{
+			"cmd": ["make", "clean"],
+			"name": "make clean",
+			"working_dir": "${project_path}",
+			"file_regex": "^(.*):(\\d+):(\\d+):\\s*(.*)$",
+		},
+
 	],
 	"folders":
 	[
@@ -44,18 +51,58 @@
             // "${project}/Core",
             "${project}/Core/Inc",
             "${project}/Core/Src",
+            "${project}/Drivers",
+            "${project}/Drivers/CMSIS",
             // "${project}/user-code/FatFs"
 		],
-        //Настройка GDB
-		"sublimegdb_workingdir": "${project_path:build}",
-		"sublimegdb_commandline": "arm-none-eabi-gdb --interpreter=mi *.elf",
+        // //Настройка GDB target remote localhost:3333
+		// "sublimegdb_workingdir": "${project_path:build}",
+		// "sublimegdb_commandline": "arm-none-eabi-gdb --interpreter=mi *.elf",
 	},
 
-	"commands":
-	[
+	"debugger_tasks": [
 		{
-			"keys": ["ctrl+f5"], "command": "ARM prog",
-		}
-
+			"name": "Compile",
+			"working_dir": "${project_path}",
+			"shell_cmd": "clang++ -std=c++14 -g main.cpp -o test",
+			"file_regex": "(..[^:]*):([0-9]+):([0-9]+)?:? error: (.*)",
+		},
 	],
+	"debugger_configurations": [
+		{
+			"name": "C++ (Console)",
+			"type": "lldb",
+			"request": "launch",
+			"pre_debug_task": "make run",
+			"program": "${project_path}/build",
+			"cwd": "${project_path}",
+			"terminal": "console",
+		},
+		{
+			"name": "C++ (Integrated Terminal)",
+			"type": "lldb",
+			"request": "launch",
+			"pre_debug_task": "Compile",
+			"program": "${project_path}/test",
+			"cwd": "${project_path}",
+			"terminal": "integrated",
+		},
+		{
+			"name": "C++ (External Terminal)",
+			"type": "lldb",
+			"request": "launch",
+			"pre_debug_task": "Compile",
+			"program": "${project_path}/test",
+			"cwd": "${project_path}",
+			"terminal": "external",
+		},
+		{
+			"name": "C++ (Attach)",
+			"type": "lldb",
+			"request": "attach",
+			"pid": "${command_pick_process}" // sublime text 4 only
+		},
+	],
+
+
 }

@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "TM1638.h"
+// #include "TM1638.h"
 
 /* USER CODE END Includes */
 
@@ -35,10 +35,10 @@ const uint8_t PWM_MIN_CHANGE = 5;
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 uint8_t timePulse = 50;
-uint8_t timePulseDivider = PWM_MIN;
 uint8_t timePulseMax = 100;
 uint8_t timePulseMin = 1;
-
+uint8_t timePulseDivider = PWM_MIN;
+uint8_t timePulse2 = 50;
 
 eDir tPulse = UP;
 eDir tDivide = UP;
@@ -143,6 +143,12 @@ int main(void)
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
+  timePulse = 50;
+  timePulseMax = htim1.Init.Period;
+  timePulseMin = 1;
+  timePulseDivider = timePulseMax/2;
+  timePulse2 = 50;
+
   HAL_TIM_Base_Start_IT(&htim1);
   // HAL_TIM_Base_Start_IT(&htim7);
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
@@ -153,13 +159,13 @@ int main(void)
 
 // BEGIN TM1638
 
-  TM1638 tm1638(DIO_TM1689_Pin, CLK_TM1689_Pin, STB_TM1689_Pin);
+  // TM1638 tm1638(DIO_TM1689_Pin, CLK_TM1689_Pin, STB_TM1689_Pin);
 
 
 
 
   HAL_TIM_Base_Start_IT(&htim17);
-  TIM17->CCR1 = (htim17.Init.Period * timePulse2) / 100u;
+  // TIM17->CCR1 = (htim17.Init.Period * timePulse2) / 100u;
   HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
 // END TM1638
 
@@ -197,12 +203,12 @@ int main(void)
 
         if( tDivide == UP )
         {
-            if( timePulseDivider >= PWM_MAX )
+            if( timePulseDivider >= timePulseMax )
                 tDivide = DOWN;
             else
                 timePulseDivider += PWM_MIN_CHANGE;
         } else {
-            if ( timePulse <= PWM_MIN )
+            if ( timePulse <= timePulseMin )
                 tDivide = UP;
             else
                 timePulseDivider -= PWM_MIN_CHANGE;
@@ -212,10 +218,6 @@ int main(void)
 
         HAL_GPIO_WritePin( GPIOE, GPIO_PIN_14, GPIO_PIN_RESET );
     }
-
-
-
-
 
     /* USER CODE END WHILE */
 
@@ -387,9 +389,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 384-1;
+  htim1.Init.Prescaler = 64-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 500-1;
+  htim1.Init.Period = 1000-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -428,6 +430,8 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
